@@ -1,5 +1,24 @@
 # Build Instructions for ReliNet
 
+## Quick Start (Recommended)
+
+The easiest way to build ReliNet is using the provided build scripts:
+
+### Linux/macOS
+```bash
+./build.sh
+```
+
+### Windows
+```cmd
+build.bat
+```
+
+These scripts will automatically:
+- Create the build directory
+- Configure CMake
+- Build all targets (library, server, client)
+
 ## Prerequisites
 
 ### Required Software

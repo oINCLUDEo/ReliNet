@@ -70,7 +70,19 @@ ReliNet is a reusable component that provides guaranteed message delivery betwee
 - Qt 6 (Core, Network, Sql modules)
 - C++17 compiler
 
-### Build Instructions
+### Quick Build (Recommended)
+
+**Linux/macOS:**
+```bash
+./build.sh
+```
+
+**Windows:**
+```cmd
+build.bat
+```
+
+### Manual Build
 
 ```bash
 mkdir build

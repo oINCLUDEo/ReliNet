@@ -10,6 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Network Sql)
 
 # ReliNet Library
 add_library(ReliNetLib
+    # Source files
     lib/src/Message.cpp
     lib/src/MessageManager.cpp
     lib/src/PersistentQueue.cpp
@@ -17,6 +18,15 @@ add_library(ReliNetLib
     lib/src/PrimaryChannel.cpp
     lib/src/BackupChannel.cpp
     lib/src/DeliveryEngine.cpp
+    # Header files (needed for MOC)
+    lib/include/Message.h
+    lib/include/MessageManager.h
+    lib/include/PersistentQueue.h
+    lib/include/ChannelManager.h
+    lib/include/IChannel.h
+    lib/include/PrimaryChannel.h
+    lib/include/BackupChannel.h
+    lib/include/DeliveryEngine.h
 )
 
 target_include_directories(ReliNetLib PUBLIC
