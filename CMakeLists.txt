@@ -2,40 +2,61 @@ cmake_minimum_required(VERSION 3.16)
 
 project(ReliNet VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Sql)
 
-qt_standard_project_setup(REQUIRES 6.8)
-
-qt_add_executable(appReliNet
-    main.cpp
+# ReliNet Library
+add_library(ReliNetLib
+    lib/src/Message.cpp
+    lib/src/MessageManager.cpp
+    lib/src/PersistentQueue.cpp
+    lib/src/ChannelManager.cpp
+    lib/src/PrimaryChannel.cpp
+    lib/src/BackupChannel.cpp
+    lib/src/DeliveryEngine.cpp
 )
 
-qt_add_qml_module(appReliNet
-    URI ReliNet
-    QML_FILES
-        Main.qml
+target_include_directories(ReliNetLib PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-set_target_properties(appReliNet PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appReliNet
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+target_link_libraries(ReliNetLib
+    PUBLIC
+        Qt6::Core
+        Qt6::Network
+        Qt6::Sql
 )
 
-target_link_libraries(appReliNet
-    PRIVATE Qt6::Quick
+# Server Application
+add_executable(ReliNetServer
+    server/server_main.cpp
 )
 
+target_link_libraries(ReliNetServer
+    PRIVATE
+        Qt6::Core
+        Qt6::Network
+)
+
+# Client Application
+add_executable(ReliNetClient
+    client/client_main.cpp
+)
+
+target_link_libraries(ReliNetClient
+    PRIVATE
+        ReliNetLib
+        Qt6::Core
+        Qt6::Network
+        Qt6::Sql
+)
+
+# Installation
 include(GNUInstallDirs)
-install(TARGETS appReliNet
-    BUNDLE DESTINATION .
+install(TARGETS ReliNetLib ReliNetServer ReliNetClient
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
