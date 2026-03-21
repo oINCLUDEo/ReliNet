@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(ReliNet VERSION 0.1 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Create a test build without Qt dependencies for basic compilation check
+# Compiler flags
+add_compile_options(-Wall -Wextra)
+
+# Test library with just the protocol and basic classes (no Qt dependencies)
+add_library(relinet_test
+    src/protocol.cpp
+    src/metrics.cpp
+)
+
+target_include_directories(relinet_test PUBLIC include)
+
+# Create dummy main for compilation test
+add_executable(test_compile
+    EXCLUDE_FROM_ALL
+    main_test.cpp
+)
+target_link_libraries(test_compile PRIVATE relinet_test)
+
+message(STATUS "Basic compilation test configured. Qt dependencies skipped.")
+message(STATUS "Run 'make test_compile' to test basic compilation.")
