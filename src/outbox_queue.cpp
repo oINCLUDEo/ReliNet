@@ -5,6 +5,10 @@
 
 namespace ReliNet {
 
+// File format constants (used by OutboxRecord serialize/deserialize)
+static constexpr uint32_t OUTBOX_MAGIC = 0xFEEDFACE;
+static constexpr uint8_t  OUTBOX_VERSION = 1;
+
 OutboxRecord::OutboxRecord(uint64_t id, Priority prio, ContextTag ctx, const QByteArray& data)
     : message_id(id), priority(prio), context_tag(ctx), status(MessageStatus::PENDING), payload(data), file_offset(-1) {
 }
@@ -57,7 +61,7 @@ Result<OutboxRecord> OutboxRecord::deserialize(const QByteArray& data, qint64 of
     record.status = static_cast<MessageStatus>(status_raw);
     record.file_offset = offset;
     
-    if (data.size() < 20 + payload_len) {
+    if (static_cast<uint32_t>(data.size()) < 20 + payload_len) {
         return Result<OutboxRecord>(ProtocolError::BufferTooSmall);
     }
     
@@ -268,7 +272,7 @@ bool OutboxQueue::updateRecordStatus(qint64 offset, MessageStatus status) {
     return written == 1;
 }
 
-QList<OutboxRecord> OutboxQueue::loadAllRecords() {
+QList<OutboxRecord> OutboxQueue::loadAllRecords() const {
     QList<OutboxRecord> records;
     
     if (!file_.isOpen()) {

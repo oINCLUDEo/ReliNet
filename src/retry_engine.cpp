@@ -60,8 +60,8 @@ void RetryEngine::sendMessage(const Message& message) {
     // Connect retry timer
     connect(in_flight->retry_timer.get(), &QTimer::timeout, this, &RetryEngine::onRetryTimer);
     
-    // Store in map using insert
-    in_flight_messages_.insert(msg_id, std::move(in_flight));
+    // Store in map using emplace
+    in_flight_messages_.emplace(msg_id, std::move(in_flight));
     
     // Serialize and send immediately
     auto serialized = ProtocolCodec::serialize(message);
@@ -78,7 +78,7 @@ void RetryEngine::sendMessage(const Message& message) {
 void RetryEngine::handleAck(uint64_t message_id) {
     auto it = in_flight_messages_.find(message_id);
     if (it != in_flight_messages_.end()) {
-        Priority priority = it.value()->message.header.priority;
+        Priority priority = it->second->message.header.priority;
         removeInFlightMessage(message_id);
         emit deliveryConfirmed(message_id, priority);
     }
@@ -98,7 +98,7 @@ void RetryEngine::forceRetry(uint64_t message_id) {
     auto it = in_flight_messages_.find(message_id);
     if (it != in_flight_messages_.end()) {
         // Stop current timer and retry immediately
-        it.value()->retry_timer->stop();
+        it->second->retry_timer->stop();
         onRetryTimer(); // This will find the right message by sender()
     }
 }
@@ -106,14 +106,19 @@ void RetryEngine::forceRetry(uint64_t message_id) {
 void RetryEngine::cancelMessage(uint64_t message_id) {
     auto it = in_flight_messages_.find(message_id);
     if (it != in_flight_messages_.end()) {
-        Priority priority = it.value()->message.header.priority;
+        Priority priority = it->second->message.header.priority;
         removeInFlightMessage(message_id);
         emit deliveryFailed(message_id, priority); // Treat cancellation as failure
     }
 }
 
 QList<uint64_t> RetryEngine::getInFlightMessageIds() const {
-    return in_flight_messages_.keys();
+    QList<uint64_t> keys;
+    keys.reserve(static_cast<int>(in_flight_messages_.size()));
+    for (const auto& kv : in_flight_messages_) {
+        keys.append(kv.first);
+    }
+    return keys;
 }
 
 void RetryEngine::onRetryTimer() {
@@ -123,14 +128,14 @@ void RetryEngine::onRetryTimer() {
     
     uint64_t message_id = 0;
     auto it = std::find_if(in_flight_messages_.begin(), in_flight_messages_.end(),
-                          [timer](const std::unique_ptr<InFlightMessage>& msg) {
-                              return msg->retry_timer.get() == timer;
+                          [timer](const std::pair<const uint64_t, std::unique_ptr<InFlightMessage>>& kv) {
+                              return kv.second->retry_timer.get() == timer;
                           });
     
     if (it == in_flight_messages_.end()) return;
     
-    message_id = it.key();
-    InFlightMessage& in_flight = *(it.value());
+    message_id = it->first;
+    InFlightMessage& in_flight = *(it->second);
     
     Priority priority = in_flight.message.header.priority;
     int max_retries = getMaxRetries(priority);
@@ -197,7 +202,7 @@ void RetryEngine::scheduleRetry(uint64_t message_id) {
     auto it = in_flight_messages_.find(message_id);
     if (it == in_flight_messages_.end()) return;
     
-    InFlightMessage& in_flight = *(it.value());
+    InFlightMessage& in_flight = *(it->second);
     int backoff_ms = calculateBackoffMs(in_flight.message.header.priority, in_flight.retry_count);
     
     in_flight.retry_timer->start(backoff_ms);
@@ -206,7 +211,7 @@ void RetryEngine::scheduleRetry(uint64_t message_id) {
 void RetryEngine::removeInFlightMessage(uint64_t message_id) {
     auto it = in_flight_messages_.find(message_id);
     if (it != in_flight_messages_.end()) {
-        it.value()->retry_timer->stop();
+        it->second->retry_timer->stop();
         in_flight_messages_.erase(it);
     }
 }

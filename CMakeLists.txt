@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Try Qt6 first, fallback to Qt5
-find_package(Qt6 QUIET COMPONENTS Core Network Widgets)
+find_package(Qt6 QUIET COMPONENTS Core Network Widgets SerialPort)
 if(NOT Qt6_FOUND)
-    find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets)
+    find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets SerialPort)
     set(QT_VERSION 5)
     message(STATUS "Using Qt5")
 else()
@@ -43,6 +43,10 @@ set(RELINET_SOURCES
     src/retry_engine.cpp
     src/outbox_queue.cpp
     src/tcp_transport.cpp
+    src/udp_transport.cpp
+    src/serial_transport.cpp
+    src/satellite_transport.cpp
+    src/bluetooth_transport_stub.cpp
     src/endpoint_manager.cpp
     src/protocol_fallback.cpp
     src/heartbeat.cpp
@@ -51,6 +55,21 @@ set(RELINET_SOURCES
     src/mainwindow.cpp
     src/theme_manager.cpp
     src/metrics.cpp
+    # Headers with Q_OBJECT must be listed so AUTOMOC processes them
+    include/protocol.hpp
+    include/retry_engine.hpp
+    include/outbox_queue.hpp
+    include/itransport.hpp
+    include/tcp_transport.hpp
+    include/serial_transport.hpp
+    include/bluetooth_transport.hpp
+    include/endpoint_manager.hpp
+    include/protocol_fallback.hpp
+    include/heartbeat.hpp
+    include/link_monitor.hpp
+    include/mainwindow.hpp
+    include/theme_manager.hpp
+    include/metrics.hpp
 )
 
 add_library(relinet ${RELINET_SOURCES})
@@ -62,12 +81,14 @@ if(QT_VERSION EQUAL 6)
         Qt6::Core
         Qt6::Network
         Qt6::Widgets
+        Qt6::SerialPort
     )
 else()
     target_link_libraries(relinet PUBLIC
         Qt5::Core
         Qt5::Network
         Qt5::Widgets
+        Qt5::SerialPort
     )
 endif()
 

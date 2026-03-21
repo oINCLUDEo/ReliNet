@@ -1,13 +1,11 @@
 #include "itransport.hpp"
-#include "serial_transport.cpp" // Include SerialTransport implementation
+#include "serial_transport.hpp"
 #include <QTimer>
 #include <QRegularExpression>
 #include <QDebug>
+#include <algorithm>
 
 namespace ReliNet {
-
-// Forward declaration for SerialTransport if not included
-class SerialTransport;
 
 class SatelliteTransport : public ITransport {
     Q_OBJECT
@@ -291,7 +289,12 @@ void SatelliteTransport::processModemResponse(const QString& response) {
         if (match.hasMatch()) {
             int signal = match.captured(1).toInt();
             // Convert to 0-5 scale (31 is max signal in AT+CSQ)
-            signal_strength_ = (signal >= 31) ? 0 : (signal / 6); // 0=no signal, 5=full
+            // signal==99 means not known/not detectable
+            if (signal == 99) {
+                signal_strength_ = 0;
+            } else {
+                signal_strength_ = std::min(5, signal / 6 + (signal >= 30 ? 1 : 0));
+            }
             emit signalStrengthChanged(signal_strength_);
         }
         modem_state_ = Idle;

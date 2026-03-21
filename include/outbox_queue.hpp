@@ -71,16 +71,13 @@ private:
     bool openFile();
     bool writeRecord(const OutboxRecord& record);
     bool updateRecordStatus(qint64 offset, MessageStatus status);
-    QList<OutboxRecord> loadAllRecords();
+    QList<OutboxRecord> loadAllRecords() const;
     
     QString filename_;
-    QFile file_;
-    QDataStream stream_;
+    mutable QFile file_;
+    mutable QDataStream stream_;
     mutable QMutex mutex_; // Thread-safe access
     QMap<uint64_t, qint64> message_offsets_; // message_id -> file offset for fast status updates
-    
-    // static constexpr uint32_t OUTBOX_MAGIC = 0xFEEDFACE;
-    // static constexpr uint8_t OUTBOX_VERSION = 1;
 };
 
 // Priority comparator for sorting

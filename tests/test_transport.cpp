@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "tcp_transport.cpp" // Include implementation for testing
+#include "tcp_transport.hpp"
+#include "bluetooth_transport.hpp"
 #include <QSignalSpy>
 
 using namespace ReliNet;

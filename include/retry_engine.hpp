@@ -3,11 +3,11 @@
 #include "protocol.hpp"
 #include <QObject>
 #include <QTimer>
-#include <QMap>
 #include <QSet>
 #include <QDateTime>
 #include <functional>
 #include <memory>
+#include <unordered_map>
 
 namespace ReliNet {
 
@@ -88,7 +88,7 @@ private:
     void removeInFlightMessage(uint64_t message_id);
     
     RetryConfig config_;
-    QMap<uint64_t, std::unique_ptr<InFlightMessage>> in_flight_messages_;
+    std::unordered_map<uint64_t, std::unique_ptr<InFlightMessage>> in_flight_messages_;
     QSet<uint64_t> received_message_ids_; // For deduplication
     
     static constexpr int DEDUP_HISTORY_SIZE = 1000;

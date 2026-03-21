@@ -1,34 +1,7 @@
-#include "itransport.hpp"
-#include <QBluetoothSocket>
-#include <QBluetoothDeviceInfo>
+#include "bluetooth_transport.hpp"
 #include <QDebug>
 
 namespace ReliNet {
-
-class BluetoothTransport : public ITransport {
-    Q_OBJECT
-    
-public:
-    explicit BluetoothTransport(QObject* parent = nullptr);
-    ~BluetoothTransport() override;
-    
-    // ITransport interface
-    QString transportName() const override { return "Bluetooth (STUB)"; }
-    TransportCapabilities capabilities() const override;
-    TransportType transportType() const override { return TransportType::BLUETOOTH; }
-    
-    bool isConnected() const override { return false; }
-    QString getConnectionInfo() const override { return "Bluetooth Not Implemented"; }
-    
-public slots:
-    void connectToHost(const QString& address, uint16_t port) override;
-    void disconnect() override;
-    void sendData(const QByteArray& data) override;
-    
-private:
-    // Stub implementation - all methods return NotImplemented error
-    void emitNotImplementedError(const QString& operation);
-};
 
 BluetoothTransport::BluetoothTransport(QObject* parent) : ITransport(parent) {
     // This is a stub implementation
@@ -114,4 +87,3 @@ void BluetoothTransport::emitNotImplementedError(const QString& operation) {
 
 } // namespace ReliNet
 
-#include "bluetooth_transport_stub.moc"
