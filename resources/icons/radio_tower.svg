@@ -1,0 +1,5 @@
+<!-- Placeholder radio tower icon for military mode -->
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="7" y="4" width="2" height="8" fill="#5D7A3A"/>
+  <circle cx="8" cy="4" r="3" stroke="#5D7A3A" fill="none"/>
+</svg>
